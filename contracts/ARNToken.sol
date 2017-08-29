@@ -66,23 +66,23 @@ contract Aeron is SafeMath {
         name = 'Aeron';                          // Set the name for display purposes
         symbol = 'ARN';                          // Set the symbol for display purposes
         decimals = 8;                            // Amount of decimals for display purposes
-	      owner = msg.sender;
+	owner = msg.sender;
     }
 
     /* Send tokens */
     function transfer(address _to, uint256 _value) {
         if (_to == 0x0) revert();                               // Prevent transfer to 0x0 address. Use burn() instead
-	      if (_value <= 0) revert();
+	if (_value <= 0) revert();
         if (balanceOf[msg.sender] < _value) revert();           // Check if the sender has enough
         if (balanceOf[_to] + _value < balanceOf[_to]) revert(); // Check for overflows
-        balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);              // Subtract from the sender
-        balanceOf[_to] = SafeMath.safeAdd(balanceOf[_to], _value);                            // Add the same to the recipient
+        balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);            // Subtract from the sender
+        balanceOf[_to] = SafeMath.safeAdd(balanceOf[_to], _value);                          // Add the same to the recipient
         Transfer(msg.sender, _to, _value);                      // Notify anyone listening that this transfer took place
     }
 
     /* Allow another contract to spend some tokens in your behalf */
     function approve(address _spender, uint256 _value) returns (bool success) {
-	      if (_value <= 0) revert();
+	if (_value <= 0) revert();
         allowance[msg.sender][_spender] = _value;
         return true;
     }
@@ -90,12 +90,12 @@ contract Aeron is SafeMath {
     /* Transfer tokens */
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
         if (_to == 0x0) revert();                                // Prevent transfer to 0x0 address. Use burn() instead
-	      if (_value <= 0) revert();
+	if (_value <= 0) revert();
         if (balanceOf[_from] < _value) revert();                 // Check if the sender has enough
         if (balanceOf[_to] + _value < balanceOf[_to]) revert();  // Check for overflows
         if (_value > allowance[_from][msg.sender]) revert();     // Check allowance
-        balanceOf[_from] = SafeMath.safeSub(balanceOf[_from], _value);                         // Subtract from the sender
-        balanceOf[_to] = SafeMath.safeAdd(balanceOf[_to], _value);                             // Add the same to the recipient
+        balanceOf[_from] = SafeMath.safeSub(balanceOf[_from], _value);                     // Subtract from the sender
+        balanceOf[_to] = SafeMath.safeAdd(balanceOf[_to], _value);                         // Add the same to the recipient
         allowance[_from][msg.sender] = SafeMath.safeSub(allowance[_from][msg.sender], _value);
         Transfer(_from, _to, _value);
         return true;
@@ -104,7 +104,7 @@ contract Aeron is SafeMath {
     /* Destruction of the token */
     function burn(uint256 _value) returns (bool success) {
         if (balanceOf[msg.sender] < _value) revert();            // Check if the sender has enough
-	      if (_value <= 0) revert();
+	if (_value <= 0) revert();
         balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);           // Subtract from the sender
         totalSupply = SafeMath.safeSub(totalSupply,_value);                                // Updates totalSupply
         Burn(msg.sender, _value);
@@ -113,18 +113,18 @@ contract Aeron is SafeMath {
 
     function freeze(uint256 _value) returns (bool success) {
         if (balanceOf[msg.sender] < _value) revert();            // Check if the sender has enough
-	      if (_value <= 0) revert();
-        balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);             // Subtract from the sender
-        freezeOf[msg.sender] = SafeMath.safeAdd(freezeOf[msg.sender], _value);               // Updates frozen tokens
+	if (_value <= 0) revert();
+        balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);            // Subtract from the sender
+        freezeOf[msg.sender] = SafeMath.safeAdd(freezeOf[msg.sender], _value);              // Updates frozen tokens
         Freeze(msg.sender, _value);
         return true;
     }
 
     function unfreeze(uint256 _value) returns (bool success) {
         if (freezeOf[msg.sender] < _value) revert();            // Check if the sender has enough
-	      if (_value <= 0) revert();
+	if (_value <= 0) revert();
         freezeOf[msg.sender] = SafeMath.safeSub(freezeOf[msg.sender], _value);              // Updates frozen tokens
-	       balanceOf[msg.sender] = SafeMath.safeAdd(balanceOf[msg.sender], _value);           // Add to the sender
+	balanceOf[msg.sender] = SafeMath.safeAdd(balanceOf[msg.sender], _value);            // Add to the sender
         Unfreeze(msg.sender, _value);
         return true;
     }
