@@ -1,54 +1,69 @@
-pragma solidity ^0.4.8;
+pragma solidity ^0.4.11;
 
 /**
- * Math operations with safety checks
+ * @title SafeMath
+ * @dev Math operations with safety checks that throw on error
  */
-contract SafeMath {
-  function safeMul(uint256 a, uint256 b) internal returns (uint256) {
-    uint256 c = a * b;
-    assert(a == 0 || c / a == b);
-    return c;
-  }
-
-  function safeDiv(uint256 a, uint256 b) internal returns (uint256) {
-    assert(b > 0);
-    uint256 c = a / b;
-    assert(a == b * c + a % b);
-    return c;
-  }
-
-  function safeSub(uint256 a, uint256 b) internal returns (uint256) {
-    assert(b <= a);
-    return a - b;
-  }
-
-  function safeAdd(uint256 a, uint256 b) internal returns (uint256) {
-    uint256 c = a + b;
-    assert(c>=a && c>=b);
-    return c;
-  }
-
-  function assert(bool assertion) internal {
-    if (!assertion) {
-      revert();
+library SafeMath {
+    function mul(uint256 a, uint256 b) internal constant returns (uint256) {
+        uint256 c = a * b;
+        assert(a == 0 || c / a == b);
+        return c;
     }
-  }
+
+    function div(uint256 a, uint256 b) internal constant returns (uint256) {
+        uint256 c = a / b;
+        return c;
+    }
+
+    function sub(uint256 a, uint256 b) internal constant returns (uint256) {
+        assert(b <= a);
+        return a - b;
+    }
+
+    function add(uint256 a, uint256 b) internal constant returns (uint256) {
+        uint256 c = a + b;
+        assert(c >= a);
+        return c;
+    }
 }
 
-contract Aeron is SafeMath {
+/**
+ * @title ERC20Basic
+ * @dev Simpler version of ERC20 interface
+ * @dev see https://github.com/ethereum/EIPs/issues/179
+ */
+contract ERC20Basic {
+    uint256 public totalSupply;
+    function balanceOf(address who) constant returns (uint256);
+    function transfer(address to, uint256 value) returns (bool);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+}
+
+
+/**
+ * @title ERC20 interface
+ * @dev see https://github.com/ethereum/EIPs/issues/20
+ */
+contract ERC20 is ERC20Basic {
+    function allowance(address owner, address spender) constant returns (uint256);
+    function transferFrom(address from, address to, uint256 value) returns (bool);
+    function approve(address spender, uint256 value) returns (bool);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+contract Aeron is ERC20 {
+    using SafeMath for uint256;
+
     string public name;
     string public symbol;
     uint8 public decimals;
-    uint256 public totalSupply;
     address public owner;
 
     /* This creates an array with all balances */
-    mapping (address => uint256) public balanceOf;
-    mapping (address => uint256) public freezeOf;
-    mapping (address => mapping (address => uint256)) public allowance;
-
-    /* This generates a public event on the blockchain that will notify clients */
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    mapping (address => uint256) public balances;
+    mapping (address => uint256) public frozen;
+    mapping (address => mapping (address => uint256)) public allowed;
 
     /* This notifies clients about the amount burnt */
     event Burn(address indexed from, uint256 value);
@@ -61,76 +76,81 @@ contract Aeron is SafeMath {
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
     function Aeron() {
-        balanceOf[msg.sender] = 10000000000000000;       // Give the creator all initial tokens
-        totalSupply = 10000000000000000;                 // Update total supply
-        name = 'Aeron';                          // Set the name for display purposes
-        symbol = 'ARN';                          // Set the symbol for display purposes
-        decimals = 8;                            // Amount of decimals for display purposes
-	owner = msg.sender;
+        balances[msg.sender] = 10000000000000000;       // Give the creator all initial tokens
+        totalSupply = 10000000000000000;                // Update total supply
+        name = 'Aeron';                                 // Set the name for display purposes
+        symbol = 'ARN';                                 // Set the symbol for display purposes
+        decimals = 8;                                   // Amount of decimals for display purposes
+        owner = msg.sender;
+    }
+
+    function balanceOf(address _owner) constant returns (uint256 balance){
+        return balances[_owner];
+    }
+
+    modifier noBurn(address _to) {
+        require(_to != 0x0);
+        _;
     }
 
     /* Send tokens */
-    function transfer(address _to, uint256 _value) {
-        if (_to == 0x0) revert();                               // Prevent transfer to 0x0 address. Use burn() instead
-	if (_value <= 0) revert();
-        if (balanceOf[msg.sender] < _value) revert();           // Check if the sender has enough
-        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); // Check for overflows
-        balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);            // Subtract from the sender
-        balanceOf[_to] = SafeMath.safeAdd(balanceOf[_to], _value);                          // Add the same to the recipient
+    function transfer(address _to, uint256 _value) noBurn(_to) returns (bool){
+        balances[msg.sender] = balances[msg.sender].sub(_value);            // Subtract from the sender
+        balances[_to] = balances[_to].add(_value);                          // Add the same to the recipient
         Transfer(msg.sender, _to, _value);                      // Notify anyone listening that this transfer took place
-    }
-
-    /* Allow another contract to spend some tokens in your behalf */
-    function approve(address _spender, uint256 _value) returns (bool success) {
-	if (_value <= 0) revert();
-        allowance[msg.sender][_spender] = _value;
         return true;
     }
 
     /* Transfer tokens */
-    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
-        if (_to == 0x0) revert();                                // Prevent transfer to 0x0 address. Use burn() instead
-	if (_value <= 0) revert();
-        if (balanceOf[_from] < _value) revert();                 // Check if the sender has enough
-        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  // Check for overflows
-        if (_value > allowance[_from][msg.sender]) revert();     // Check allowance
-        balanceOf[_from] = SafeMath.safeSub(balanceOf[_from], _value);                     // Subtract from the sender
-        balanceOf[_to] = SafeMath.safeAdd(balanceOf[_to], _value);                         // Add the same to the recipient
-        allowance[_from][msg.sender] = SafeMath.safeSub(allowance[_from][msg.sender], _value);
+    function transferFrom(address _from, address _to, uint256 _value) noBurn(_to) returns (bool success) {
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        balances[_from] = balances[_from].sub(_value);                     // Subtract from the sender
+        balances[_to] = balances[_to].add(_value);                         // Add the same to the recipient
         Transfer(_from, _to, _value);
         return true;
     }
 
+    /* Allow another contract to spend some tokens in your behalf */
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require((_value == 0) || (allowed[msg.sender][_spender] == 0));
+
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+
     /* Destruction of the token */
     function burn(uint256 _value) returns (bool success) {
-        if (balanceOf[msg.sender] < _value) revert();            // Check if the sender has enough
-	if (_value <= 0) revert();
-        balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);           // Subtract from the sender
-        totalSupply = SafeMath.safeSub(totalSupply,_value);                                // Updates totalSupply
+        balances[msg.sender] = balances[msg.sender].sub(_value);           // Subtract from the sender
+        totalSupply = totalSupply.sub(_value);                                // Updates totalSupply
         Burn(msg.sender, _value);
         return true;
     }
 
     function freeze(uint256 _value) returns (bool success) {
-        if (balanceOf[msg.sender] < _value) revert();            // Check if the sender has enough
-	if (_value <= 0) revert();
-        balanceOf[msg.sender] = SafeMath.safeSub(balanceOf[msg.sender], _value);            // Subtract from the sender
-        freezeOf[msg.sender] = SafeMath.safeAdd(freezeOf[msg.sender], _value);              // Updates frozen tokens
+        balances[msg.sender] = balances[msg.sender].sub(_value);            // Subtract from the sender
+        frozen[msg.sender] = frozen[msg.sender].add(_value);              // Updates frozen tokens
         Freeze(msg.sender, _value);
         return true;
     }
 
     function unfreeze(uint256 _value) returns (bool success) {
-        if (freezeOf[msg.sender] < _value) revert();            // Check if the sender has enough
-	if (_value <= 0) revert();
-        freezeOf[msg.sender] = SafeMath.safeSub(freezeOf[msg.sender], _value);              // Updates frozen tokens
-	balanceOf[msg.sender] = SafeMath.safeAdd(balanceOf[msg.sender], _value);            // Add to the sender
+        frozen[msg.sender] = frozen[msg.sender].sub(_value);              // Updates frozen tokens
+        balances[msg.sender] = balances[msg.sender].add(_value);            // Add to the sender
         Unfreeze(msg.sender, _value);
         return true;
     }
 
-  /* Prevents accidental sending of Ether */
-  function () {
-      revert();
-  }
+    function freezeOf(address _owner) constant returns (uint256) {
+        return frozen[_owner];
+    }
+
+    /* Prevents accidental sending of Ether */
+    function () payable {
+        revert();
+    }
 }
