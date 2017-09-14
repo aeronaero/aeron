@@ -7,3 +7,8 @@ Aeron develops a blockchain based solution to track aircraft maintenance and pil
 ## Deployment
 
 The ERC20 token contract (with source code) is published at: https://etherscan.io/token/0xBA5F11b16B155792Cf3B2E6880E8706859A8AEB6
+
+## Audit
+
+Contract verified by [TargeAd](https://targead.com).
+It implements all methods from ERC20 standard and is ready for usage on blockchain platforms.
