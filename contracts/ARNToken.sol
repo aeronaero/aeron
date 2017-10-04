@@ -93,8 +93,13 @@ contract Aeron is ERC20 {
         _;
     }
 
+    modifier noSelf(address _to) {
+        require(_to != this);
+        _;
+    }
+
     /* Send tokens */
-    function transfer(address _to, uint256 _value) noBurn(_to) returns (bool){
+    function transfer(address _to, uint256 _value) noBurn(_to) noSelf(_to) returns (bool){
         balances[msg.sender] = balances[msg.sender].sub(_value);            // Subtract from the sender
         balances[_to] = balances[_to].add(_value);                          // Add the same to the recipient
         Transfer(msg.sender, _to, _value);                      // Notify anyone listening that this transfer took place
@@ -102,7 +107,7 @@ contract Aeron is ERC20 {
     }
 
     /* Transfer tokens */
-    function transferFrom(address _from, address _to, uint256 _value) noBurn(_to) returns (bool success) {
+    function transferFrom(address _from, address _to, uint256 _value) noBurn(_to) noSelf(_to) returns (bool success) {
         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
         balances[_from] = balances[_from].sub(_value);                     // Subtract from the sender
         balances[_to] = balances[_to].add(_value);                         // Add the same to the recipient
