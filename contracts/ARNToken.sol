@@ -58,6 +58,7 @@ contract Aeron is ERC20 {
     string public name;
     string public symbol;
     uint8 public decimals;
+    string public version;
     address public owner;
 
     /* This creates an array with all balances */
@@ -81,6 +82,7 @@ contract Aeron is ERC20 {
         name = 'Aeron';                                 // Set the name for display purposes
         symbol = 'ARN';                                 // Set the symbol for display purposes
         decimals = 8;                                   // Amount of decimals for display purposes
+        version = 'ARN2.0';                             // Token contract version
         owner = msg.sender;
     }
 
