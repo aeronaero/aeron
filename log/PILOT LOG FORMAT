@@ -1,0 +1,48 @@
+COMBINED PILOT LOG FORMAT v1.3
+EASA/FAA COMPLIANT
+
+Names and functional description of the log fields (with sample data):
+
+DATE "15-02-2018"	                        flight date DD-MM-YYYY
+AIRCRAFT: TYPE "C150"	                    	ICAO aircraft type designator
+AIRCRAFT: REG "5BCLF"	                    	aircraft registration
+NAME PIC "J. SMITH"	                      	PIC name
+DEPARTURE: PLACE "LCPH"	                  	the place of departure (either in full or the internationally recognised three or four letter designator)
+DEPARTURE: TIME "13:31"	                  	time HH:MM in UTC 24h
+ARRIVAL: PLACE "LCLK"	                    	the place of destination (either in full or the internationally recognised three or four letter designator)
+ARRIVAL: TIME "15:01"		              	time HH:MM in UTC 24h
+OP. COND. TIME: NIGHT 		                flight time undertaken at night if applicable (aircraft may depart during day time and land during night time, this field may not be equal to the total flight time, hours rounded to one decimal)
+OP. COND. TIME: IFR "0.5"		     	flight time undertaken under instrument flight rules if applicable (this field may not be equal to the total flight time, hours rounded to one decimal)
+OP. COND. TIME: SIMULATED INSTRUMENT	    	flight time undertaken in simulated instrument conditions (this field may not be equal to the total flight time, hours rounded to one decimal)
+TAKE-OFFS: DAY "1"    	                  	number of take-offs during day time
+TAKE-OFFS: NIGHT		           	number of take-offs during night time
+LANDINGS: DAY "1"	                        number of landings during day time
+LANDINGS: NIGHT		                        number of landings during night time
+NUMBER OF INSTRUMENT APPROACHES	"1"	      	number of instrumental approaches
+SINGLE PILOT TIME: SINGLE ENGINE "1.5"    	flight time, single pilot operation at single engine aircraft, hours rounded to one decimal
+SINGLE PILOT TIME: MULTI ENGINE		        flight time, single pilot operation at multi engine aircraft, hours rounded to one decimal
+MULTI PILOT TIME		               	flight time, multi pilot operation, hours rounded to one decimal
+TOTAL FLIGHT TIME "1.5"	                  	total flight time, hours rounded to one decimal
+PILOT FUNCTION TIME: PIC "1.5"            	flight time as PIC, hours rounded to one decimal
+PILOT FUNCTION TIME: COPILOT		    	flight time as co-pilot, hours rounded to one decimal
+PILOT FUNCTION TIME: DUAL		      	flight time as PIC with instructor, hours rounded to one decimal
+PILOT FUNCTION TIME: INSTRUCTOR		        flight time as instructor, hours rounded to one decimal
+PILOT FUNCTION TIME: CROSS COUNTRY "1.5"  	flight time for flights conducted by a pilot in an aircraft that includes a landing at a point other than the point of departure, hours rounded to one decimal 
+SIMULATOR TRAINING SESSIONS: TYPE		type of aircraft and qualification number of the device, or FNPT I or FNPT II as appropriate
+SIMULATOR TRAINING SESSIONS: DURATON		total time of FSTD session, hours rounded to one decimal
+REVISION DATE "23-02-2018 12:37:18"	      	log entry date and time stamp in UTC 24h
+REVISION NUMBER	"1"	                      	log entry revision number, incrementing
+HASH "2d9cd763125d2bc3874ab9339a2f5c9e"	  	md5 hash of preceding raw data string
+
+* all time stamps in UTC time zone
+* all flight times in hours rounded to one decimal
+* variable data shown in " " brackets
+
+Raw data string for blockchain log entries:
+
+15-02-2018;C150;5BCLF;J. SMITH;LCPH;13:31:20;LCLK;15:01:41;;0.5;;1;;1;;1;1.5;;;1.5;1.5;;;;1.5;;;23-02-2018 12:37:18;1;2d9cd763125d2bc3874ab9339a2f5c9e
+
+Base64 encoded data string for blockchain log entries (UTF-8):
+
+MTUtMDItMjAxODtDMTUwOzVCQ0xGO0ouIFNNSVRIO0xDUEg7MTM6MzE6MjA7TENMSzsxNTowMTo0MTs7MC41OzsxOzsxOzsxOzEuNTs7OzEuNTsxLjU7Ozs7MS41Ozs7MjMtMDItMjAxOCAxMjozNzoxODsxOzJkOWNkNzYzMTI1ZDJiYzM4NzRhYjkzMzlhMmY1Yzll
+
